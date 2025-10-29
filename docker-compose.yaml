@@ -1,0 +1,24 @@
+services:
+  livox_ros2:
+    container_name: livox_ros2
+    build:
+      context: .
+      dockerfile: Dockerfile
+    network_mode: host
+    privileged: true
+    environment:
+      - ROS_DOMAIN_ID=0
+      - RMW_IMPLEMENTATION=rmw_cyclonedds_cpp
+      - ROS_LOCALHOST_ONLY=0
+      - DEBIAN_FRONTEND=noninteractive
+      - DISPLAY=${DISPLAY}
+      - QT_X11_NO_MITSHM=1
+    volumes:
+      - /tmp/.X11-unix:/tmp/.X11-unix:rw
+      - /etc/localtime:/etc/localtime:ro
+      - ~/.bash_history:/root/.bash_history
+      - ./livox_ws/src/:/livox_ws/src/
+    working_dir: /livox_ws
+    stdin_open: true
+    tty: true
+    command: ["bash"]

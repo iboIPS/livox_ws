@@ -1,6 +1,28 @@
 # Changelog
 
 All notable changes to this project will be documented in this file.
+## [1.3.0]
+### Added
+ - TFs publisher
+ - each lidar will have its own frame.
+### Change
+ - Removed ROS1 from the pkg
+ - Splitted the main package into multiple packages
+ - UserLivoxLidarConfig struct has 4 new members:
+   - frame_id
+   - parent_frame_id
+   - topic_name
+   - publish_frq
+### Removed
+ - Parameters: as they have no use in ROS2.
+    - cmdline_input_bd_code.
+    - lvx_file_path.
+    - output_data_type.
+    - data_source: it only can take kSourceRawLidar, nothing else.
+ - Message: 
+    - kPclPxyziMsg, it was for ROS1.
+    - kLivoxCustomMsg, we will remove cutome point msg, keeping only std.
+    - removed all custom msgs. 
 
 ## [1.2.4]
 ### Fixed
