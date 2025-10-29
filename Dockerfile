@@ -1,10 +1,10 @@
 # Base image with pinned digest
-FROM ros:humble@sha256:6ae2d4d3bf17eb8b13eff00824be6abf90f337eba12ebbe319f984c1d9f26792
+FROM ros:jazzy@sha256:8cef3fe8344e738ad45b68b7d6f3a382c0850be776a7605ad81d269951ac019c
 
 # Environment setup
 ENV DEBIAN_FRONTEND=noninteractive \
-    ROS_DISTRO=humble \
-    ROS_ROOT=/opt/ros/humble \
+    ROS_DISTRO=jazzy \
+    ROS_ROOT=/opt/ros/jazzy \
     LD_LIBRARY_PATH=/Livox-SDK2/build/sdk_core:$LD_LIBRARY_PATH
 
 # Install dependencies and ROS apt source updater
@@ -21,12 +21,12 @@ RUN set -eux; \
 
 # Build Livox-SDK2
 WORKDIR /Livox-SDK2
-RUN git clone https://github.com/Livox-SDK/Livox-SDK2.git . && \
-    mkdir build && cd build && \
-    cmake .. && \
-    make -j$(nproc --ignore=2 || echo 1) && \
-    make install && \
-    cd sdk_core && chmod +r liblivox_lidar_sdk_shared.so
+# RUN git clone https://github.com/Livox-SDK/Livox-SDK2.git . && \
+#     mkdir build && cd build && \
+#     cmake .. && \
+#     make -j$(nproc --ignore=2 || echo 1) && \
+#     make install && \
+#     cd sdk_core && chmod +r liblivox_lidar_sdk_shared.so
 
 RUN apt-get update && apt-get install -y \
     curl gnupg git cmake build-essential ca-certificates \
