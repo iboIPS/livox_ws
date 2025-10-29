@@ -313,9 +313,12 @@ void Lddc::PublishTFs() {
     tf_msg.child_frame_id = child;
 
     // --- 1. Convert translation from mm → m ---
-    tf_msg.transform.translation.x = static_cast<double>(ext.x) / 1000.0;
-    tf_msg.transform.translation.y = static_cast<double>(ext.y) / 1000.0;
-    tf_msg.transform.translation.z = static_cast<double>(ext.z) / 1000.0;
+    double tx = static_cast<double>(ext.x) / 1000.0;
+    double ty = static_cast<double>(ext.y) / 1000.0;
+    double tz = static_cast<double>(ext.z) / 1000.0;
+    tf_msg.transform.translation.x = tx;
+    tf_msg.transform.translation.y = ty;
+    tf_msg.transform.translation.z = tz;
 
     // --- 2. Convert rotation from deg → rad ---
     double roll_rad  = static_cast<double>(ext.roll)  * M_PI / 180.0;
