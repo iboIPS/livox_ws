@@ -21,12 +21,12 @@ RUN set -eux; \
 
 # Build Livox-SDK2
 WORKDIR /Livox-SDK2
-# RUN git clone https://github.com/Livox-SDK/Livox-SDK2.git . && \
-#     mkdir build && cd build && \
-#     cmake .. && \
-#     make -j$(nproc --ignore=2 || echo 1) && \
-#     make install && \
-#     cd sdk_core && chmod +r liblivox_lidar_sdk_shared.so
+RUN git clone -b ubuntu_24 https://github.com/iboIPS/Livox-SDK2.git . && \
+    mkdir build && cd build && \
+    cmake .. && \
+    make -j$(nproc --ignore=2 || echo 1) && \
+    make install && \
+    cd sdk_core && chmod +r liblivox_lidar_sdk_shared.so
 
 RUN apt-get update && apt-get install -y \
     curl gnupg git cmake build-essential ca-certificates \

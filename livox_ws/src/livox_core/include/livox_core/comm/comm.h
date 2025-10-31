@@ -252,6 +252,7 @@ typedef struct {
   std::string parent_frame_id;
   std::string topic_name;
   double publish_frq;
+  uint8_t qos_queue_size;
   bool publish_tf;
   int32_t blind_spot_set;
   int8_t dual_emit_en;

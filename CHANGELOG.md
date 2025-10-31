@@ -1,6 +1,12 @@
 # Changelog
 
 All notable changes to this project will be documented in this file.
+## [1.4.0]
+### Added
+ - Jazzy ROS2.
+ - publish topic is set on Sensor QoS.
+ - QoS queue size is in config now.
+
 ## [1.3.0]
 ### Added
  - TFs publisher

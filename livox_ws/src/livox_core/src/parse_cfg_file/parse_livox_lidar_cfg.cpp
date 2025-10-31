@@ -83,6 +83,11 @@ bool LivoxLidarConfigParser::ParseUserConfigs(const rapidjson::Document &doc,
     } else {
       user_config.publish_frq = double(config["publish_frq"].GetDouble());
     }
+    if (!config.HasMember("qos_queue_size")){
+      user_config.qos_queue_size = 1;
+    } else {
+      user_config.qos_queue_size = double(config["qos_queue_size"].GetDouble());
+    }
     if (!config.HasMember("publish_tf")){
       user_config.publish_tf = true;
     } else {

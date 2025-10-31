@@ -170,7 +170,11 @@ void Lddc::InitPointcloud2Msg(const uint8_t index, const StoragePacket& pkg, Poi
 
   // // --- Frame ID selection ---
   std::string lidar_frame;
-  lidar_frame = lds_->lidars_[index].livox_config.frame_id;
+  if (lds_->lidars_[index].livox_config.publish_tf) {
+    lidar_frame = lds_->lidars_[index].livox_config.parent_frame_id;
+  } else {
+    lidar_frame = lds_->lidars_[index].livox_config.frame_id;
+  }
 
   cloud.header.frame_id.assign(lidar_frame);
   cloud.point_step = sizeof(LivoxPointXyzrtlt);
@@ -237,38 +241,37 @@ void Lddc::PublishImuData(LidarImuDataQueue& imu_data_queue, const uint8_t index
 }
 
 std::shared_ptr<rclcpp::PublisherBase> Lddc::CreatePublisher(uint8_t msg_type, std::string &topic_name, uint32_t queue_size) {
-    if (kPointCloud2Msg == msg_type) {
-      DRIVER_INFO(*cur_node_,
-          "%s publish use PointCloud2 format", topic_name.c_str());
-      return cur_node_->create_publisher<PointCloud2>(topic_name, queue_size);
-    } 
-    else if (kLivoxImuMsg == msg_type)  {
-      DRIVER_INFO(*cur_node_,
-          "%s publish use imu format", topic_name.c_str());
-      return cur_node_->create_publisher<ImuMsg>(topic_name, queue_size);
-    } else {
-      PublisherPtr null_publisher(nullptr);
-      return null_publisher;
-    }
+  rclcpp::QoS qos = rclcpp::SensorDataQoS().keep_last(queue_size);
+
+  if (kPointCloud2Msg == msg_type) {
+    DRIVER_INFO(*cur_node_,
+        "%s publish use PointCloud2 format", topic_name.c_str());
+    return cur_node_->create_publisher<PointCloud2>(topic_name, qos);
+  } 
+  else if (kLivoxImuMsg == msg_type)  {
+    DRIVER_INFO(*cur_node_,
+        "%s publish use imu format", topic_name.c_str());
+    return cur_node_->create_publisher<ImuMsg>(topic_name, qos);
+  } else {
+    PublisherPtr null_publisher(nullptr);
+    return null_publisher;
+  }
 }
 
 std::shared_ptr<rclcpp::PublisherBase> Lddc::GetCurrentPublisher(uint8_t handle) {
-  uint32_t queue_size = kMinEthPacketQueueSize;
+  uint32_t queue_size = lds_->lidars_[handle].livox_config.qos_queue_size;
   if (!private_pub_[handle]) {
     std::string topic_name(lds_->lidars_[handle].livox_config.topic_name + "/lidar");
-    queue_size = queue_size * 2; // queue size is 64 for only one lidar
     private_pub_[handle] = CreatePublisher(kPointCloud2Msg, topic_name, queue_size);
   }
   return private_pub_[handle];
 }
 
 std::shared_ptr<rclcpp::PublisherBase> Lddc::GetCurrentImuPublisher(uint8_t handle) {
-  uint32_t queue_size = kMinEthPacketQueueSize;
+  uint32_t queue_size = lds_->lidars_[handle].livox_config.qos_queue_size;
   if (!private_imu_pub_[handle]) {
     std::string topic_name(lds_->lidars_[handle].livox_config.topic_name + "/imu");
-    queue_size = queue_size * 2; // queue size is 64 for only one lidar
-    private_imu_pub_[handle] = CreatePublisher(kLivoxImuMsg, topic_name,
-        queue_size);
+    private_imu_pub_[handle] = CreatePublisher(kLivoxImuMsg, topic_name, queue_size);
   }
   return private_imu_pub_[handle];
 }
@@ -313,9 +316,12 @@ void Lddc::PublishTFs() {
     tf_msg.child_frame_id = child;
 
     // --- 1. Convert translation from mm → m ---
-    tf_msg.transform.translation.x = static_cast<double>(ext.x) / 1000.0;
-    tf_msg.transform.translation.y = static_cast<double>(ext.y) / 1000.0;
-    tf_msg.transform.translation.z = static_cast<double>(ext.z) / 1000.0;
+    double tx = static_cast<double>(ext.x) / 1000.0;
+    double ty = static_cast<double>(ext.y) / 1000.0;
+    double tz = static_cast<double>(ext.z) / 1000.0;
+    tf_msg.transform.translation.x = tx;
+    tf_msg.transform.translation.y = ty;
+    tf_msg.transform.translation.z = tz;
 
     // --- 2. Convert rotation from deg → rad ---
     double roll_rad  = static_cast<double>(ext.roll)  * M_PI / 180.0;
